@@ -18,7 +18,7 @@
 
     /* ── Header ────────────────────────────────── */
     .header {
-      background: #014147;
+      background: #003237;
       padding: 20px 32px;
       display: flex;
       align-items: center;
@@ -50,7 +50,7 @@
       gap: 6px;
       background: #e8f4f5;
       border: 1px solid #c2dfe2;
-      color: #014147;
+      color: #003237;
       font-size: 12px;
       font-weight: 500;
       padding: 6px 14px;
@@ -105,7 +105,7 @@
     }
     .filter-group select:focus {
       outline: none;
-      border-color: #014147;
+      border-color: #003237;
     }
     .btn-reset {
       padding: 8px 16px;
@@ -121,8 +121,8 @@
       align-self: flex-end;
     }
     .btn-reset:hover {
-      border-color: #014147;
-      color: #014147;
+      border-color: #003237;
+      color: #003237;
     }
 
     /* ── KPI cards ──────────────────────────────── */
@@ -133,7 +133,7 @@
       margin-bottom: 24px;
     }
     .kpi-card {
-      background: #014147;
+      background: #003237;
       border-radius: 12px;
       padding: 24px 28px;
       color: #fff;
@@ -343,6 +343,38 @@
     tr.row-alerta:hover { background: #fee2e2; }
     tr.row-alerta td:first-child { border-left: 3px solid #dc2626; }
 
+    /* ── Proyecto más desviado ──────────────────── */
+    .dev-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 24px;
+      border-left: 4px solid #FA4616;
+    }
+    .dev-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .dev-project-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a2e35;
+      margin-bottom: 12px;
+    }
+    .dev-pct {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .dev-period {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+
     /* ── Chart toggle ───────────────────────────── */
     .toggle-group {
       display: flex;
@@ -365,7 +397,7 @@
     }
     .toggle-btn.active {
       background: #fff;
-      color: #014147;
+      color: #003237;
       font-weight: 600;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
@@ -380,7 +412,7 @@
     .state-msg .spinner {
       width: 32px; height: 32px;
       border: 3px solid #d4dfe2;
-      border-top-color: #014147;
+      border-top-color: #003237;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 16px;
@@ -452,7 +484,7 @@
     <div class="load-row">
       <div class="load-row-label">Presupuestadas</div>
       <div class="load-bar-wrap">
-        <div class="load-bar-fill" id="loadBarPres" style="width:0%; background:#014147"></div>
+        <div class="load-bar-fill" id="loadBarPres" style="width:0%; background:#003237"></div>
       </div>
       <div class="load-row-value" id="loadValPres">—</div>
     </div>
@@ -462,6 +494,30 @@
         <div class="load-bar-fill" id="loadBarEjec" style="width:0%"></div>
       </div>
       <div class="load-row-value" id="loadValEjec">—</div>
+    </div>
+  </div>
+
+  <!-- Proyecto más desviado -->
+  <div class="dev-card">
+    <div class="dev-card-header">
+      <div class="load-label" id="devLabel">Proyecto más desviado · Últimas 5 semanas</div>
+      <div class="dev-pct" id="devPct">—</div>
+    </div>
+    <div class="dev-period" id="devPeriod"></div>
+    <div class="dev-project-name" id="devProject">—</div>
+    <div class="load-row">
+      <div class="load-row-label">Presupuestadas</div>
+      <div class="load-bar-wrap">
+        <div class="load-bar-fill" id="devBarPres" style="width:0%; background:#003237"></div>
+      </div>
+      <div class="load-row-value" id="devValPres">—</div>
+    </div>
+    <div class="load-row">
+      <div class="load-row-label">Ejecutadas</div>
+      <div class="load-bar-wrap">
+        <div class="load-bar-fill" id="devBarEjec" style="width:0%"></div>
+      </div>
+      <div class="load-row-value" id="devValEjec">—</div>
     </div>
   </div>
 
@@ -521,8 +577,8 @@
 // ── Config ──────────────────────────────────────────────────────────────
 const CSV_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH3WRpiSJdHt8k8A5IyTZvuICn1rP1RbMMbgjlriG5V_m_dJ0gdC8ljZiafMFecSw3NTdAaZgWpo6w/pub?gid=1522575662&single=true&output=csv';
 const CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH3WRpiSJdHt8k8A5IyTZvuICn1rP1RbMMbgjlriG5V_m_dJ0gdC8ljZiafMFecSw3NTdAaZgWpo6w/pub?gid=563155318&single=true&output=csv';
-const TEAL       = '#014147';
-const ORANGE     = '#FF4B19';
+const TEAL       = '#003237';
+const ORANGE     = '#FA4616';
 
 const NOMBRE_MAP = {
   'A. Roa':           'Ana Roa',
@@ -531,7 +587,7 @@ const NOMBRE_MAP = {
   'Jhojann Rodriguez':'Jhojann Rodríguez',
   'Natalia Rodriguez':'Natalia Rodríguez',
 };
-const TEAL_LIGHT = 'rgba(1,65,71,0.75)';
+const TEAL_LIGHT = 'rgba(0,50,55,0.75)';
 
 // ── State ────────────────────────────────────────────────────────────────
 let allData = [];
@@ -755,7 +811,7 @@ function updateLoadBar() {
   // % vs presupuesto
   const realPct   = pres > 0 ? (ejec / pres) * 100 : 0;
   const loadColor = realPct <= 80  ? '#34d399'
-                  : realPct <= 100 ? '#FF4B19'
+                  : realPct <= 100 ? '#FA4616'
                   :                  '#f87171';
   const maxVal = Math.max(pres, ejec) || 1;
 
@@ -766,7 +822,7 @@ function updateLoadBar() {
   const cap40   = nColab * Math.max(capAjus, 1);
   const pct40   = cap40 > 0 ? (pres / cap40) * 100 : 0;
   const color40 = pct40 <= 80  ? '#34d399'
-                : pct40 <= 100 ? '#FF4B19'
+                : pct40 <= 100 ? '#FA4616'
                 :                '#f87171';
 
   document.getElementById('loadBarPres').style.width      = (pres / maxVal * 100) + '%';
@@ -975,23 +1031,23 @@ function renderTrend(filteredNoSemana) {
         {
           label: 'Presupuestadas',
           data: pres,
-          borderColor: '#014147',
-          backgroundColor: 'rgba(1,65,71,0.08)',
+          borderColor: '#003237',
+          backgroundColor: 'rgba(0,50,55,0.08)',
           borderWidth: 2,
           borderDash: [6, 3],
           pointRadius: 4,
-          pointBackgroundColor: '#014147',
+          pointBackgroundColor: '#003237',
           fill: false,
           tension: 0.3,
         },
         {
           label: 'Ejecutadas',
           data: ejec,
-          borderColor: '#FF4B19',
-          backgroundColor: 'rgba(255,75,25,0.08)',
+          borderColor: '#FA4616',
+          backgroundColor: 'rgba(250,70,22,0.08)',
           borderWidth: 2,
           pointRadius: 4,
-          pointBackgroundColor: '#FF4B19',
+          pointBackgroundColor: '#FA4616',
           fill: false,
           tension: 0.3,
         }
@@ -1011,6 +1067,60 @@ function renderTrend(filteredNoSemana) {
   });
 }
 
+// ── Proyecto más desviado (últimas 5 semanas) ─────────────────────────────
+function updateMostDeviated() {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const currentWeek = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+
+  const allNums = [...new Set(allData.map(r => Number(r.semana)).filter(n => !isNaN(n) && n > 0))].sort((a, b) => a - b);
+  const candidates = allNums.filter(s => s <= currentWeek - 1);
+  const last5 = candidates.slice(-5);
+
+  if (!last5.length) return;
+
+  const recentData = allData.filter(r => last5.includes(Number(r.semana)));
+
+  // Aggregate by project
+  const projectMap = {};
+  recentData.forEach(r => {
+    const k = r.proyecto || 'Sin definir';
+    if (!projectMap[k]) projectMap[k] = { pres: 0, ejec: 0 };
+    projectMap[k].pres += Number(r.horasPresupuestadas) || 0;
+    projectMap[k].ejec += Number(r.horasEjecutadas)     || 0;
+  });
+
+  // Find most deviated (highest ejec/pres ratio, pres > 0)
+  let best = null;
+  let maxRatio = -Infinity;
+  Object.entries(projectMap).forEach(([name, vals]) => {
+    if (vals.pres > 0) {
+      const ratio = vals.ejec / vals.pres;
+      if (ratio > maxRatio) { maxRatio = ratio; best = { name, ...vals, ratio }; }
+    }
+  });
+
+  if (!best) return;
+
+  const devColor = best.ratio > 1.2 ? '#f87171'
+                 : best.ratio > 1.0 ? '#FA4616'
+                 : '#34d399';
+  const maxVal = Math.max(best.pres, best.ejec) || 1;
+  const weeksLabel = last5.length > 1 ? `Sems. ${last5[0]}–${last5[last5.length - 1]}` : `Sem. ${last5[0]}`;
+  const desv = best.ejec - best.pres;
+
+  document.getElementById('devLabel').textContent   = `Proyecto más desviado · ${weeksLabel}`;
+  document.getElementById('devPeriod').textContent  = `${weeksLabel} · Desviación acumulada: ${(desv >= 0 ? '+' : '') + fmt(desv)} hrs`;
+  document.getElementById('devProject').textContent = best.name;
+  document.getElementById('devPct').textContent     = (best.ratio * 100).toFixed(1) + '%';
+  document.getElementById('devPct').style.color     = devColor;
+  document.getElementById('devBarPres').style.width      = (best.pres / maxVal * 100) + '%';
+  document.getElementById('devBarEjec').style.width      = (best.ejec / maxVal * 100) + '%';
+  document.getElementById('devBarEjec').style.background = devColor;
+  document.getElementById('devValPres').textContent = fmt(best.pres);
+  document.getElementById('devValEjec').textContent = fmt(best.ejec);
+}
+
 // ── Main update cycle ────────────────────────────────────────────────────
 function updateDashboard() {
   const data = getFiltered();
@@ -1019,6 +1129,7 @@ function updateDashboard() {
   renderTable(data);
 
   updateLoadBar();
+  updateMostDeviated();
 
   // Tendencia: aplica colaborador/proyecto/estado pero NO semana
   const c = document.getElementById('filterColaborador').value;
