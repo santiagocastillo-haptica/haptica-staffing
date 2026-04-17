@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staffing - Horas Presupuestadas · Háptica</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f6f8;
+      color: #1a2e35;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────── */
+    .header {
+      background: #003237;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left h1 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .header-left .subtitle {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 7px 14px;
+      border-radius: 8px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .nav-link:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* ── Content ────────────────────────────────── */
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+    }
+
+    /* ── Filters ────────────────────────────────── */
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .filter-group label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5a7a82;
+    }
+    .filter-group select {
+      padding: 8px 32px 8px 12px;
+      border: 1.5px solid #d4dfe2;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a2e35;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a7a82' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      min-width: 180px;
+    }
+    .filter-group select:focus {
+      outline: none;
+      border-color: #003237;
+    }
+    .btn-reset {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1.5px solid #d4dfe2;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: #5a7a82;
+      cursor: pointer;
+      transition: all 0.15s;
+      align-self: flex-end;
+    }
+    .btn-reset:hover { border-color: #003237; color: #003237; }
+
+    /* ── Update notice ───────────────────────────── */
+    .update-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f4f5;
+      border: 1px solid #c2dfe2;
+      color: #003237;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+    .update-notice::before { content: '🕐'; font-size: 13px; }
+
+    /* ── Summary bar ─────────────────────────────── */
+    .summary-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .summary-chip {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .summary-chip .chip-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #9ca3af;
+    }
+    .summary-chip .chip-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #003237;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Cards grid ──────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Consultant card ─────────────────────────── */
+    .consultant-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      transition: box-shadow 0.15s;
+    }
+    .consultant-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      gap: 8px;
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a2e35;
+      line-height: 1.2;
+    }
+    .card-total {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    .card-total .total-hrs {
+      font-size: 22px;
+      font-weight: 800;
+      color: #003237;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .card-total .total-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    /* ── Project rows ────────────────────────────── */
+    .project-rows { display: flex; flex-direction: column; gap: 10px; }
+    .project-row { display: flex; flex-direction: column; gap: 4px; }
+    .project-row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .project-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+    .project-hrs {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a2e35;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .project-pct {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-left: 4px;
+    }
+    .bar-track {
+      height: 6px;
+      background: #f0f2f4;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── Loading / Empty ─────────────────────────── */
+    .state-msg {
+      text-align: center;
+      padding: 60px 0;
+      color: #5a7a82;
+      font-size: 14px;
+    }
+    .state-msg .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #d4dfe2;
+      border-top-color: #003237;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 700px) {
+      .header { flex-direction: column; align-items: flex-start; }
+      .filters { flex-direction: column; }
+      .filter-group select { min-width: 100%; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Staffing - Horas Presupuestadas</h1>
+    <div class="subtitle">Distribución de horas presupuestadas por consultor y proyecto</div>
+  </div>
+  <a class="nav-link" href="index.html">← Dashboard general</a>
+</div>
+
+<div class="content">
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Semana</label>
+      <select id="filterSemana"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Consultor</label>
+      <select id="filterConsultor"><option value="">Todos</option></select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">↺ Limpiar</button>
+  </div>
+
+  <!-- Update notice -->
+  <div class="update-notice" id="updateNotice">Cargando datos…</div>
+
+  <!-- Summary chips -->
+  <div class="summary-bar" id="summaryBar" style="display:none">
+    <div class="summary-chip">
+      <div class="chip-label">Consultores</div>
+      <div class="chip-value" id="sumConsultores">—</div>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-label">Proyectos activos</div>
+      <div class="chip-value" id="sumProyectos">—</div>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-label">Total horas presupuestadas</div>
+      <div class="chip-value" id="sumHoras">—</div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div id="cardsContainer">
+    <div class="state-msg"><div class="spinner"></div>Cargando…</div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH3WRpiSJdHt8k8A5IyTZvuICn1rP1RbMMbgjlriG5V_m_dJ0gdC8ljZiafMFecSw3NTdAaZgWpo6w/pub?gid=1522575662&single=true&output=csv';
+
+const NOMBRE_MAP = {
+  'A. Roa':            'Ana Roa',
+  'C. Niño':           'Camilo Niño',
+  'J. Rodríguez':      'Jhojann Rodríguez',
+  'Jhojann Rodriguez': 'Jhojann Rodríguez',
+  'Natalia Rodriguez': 'Natalia Rodríguez',
+};
+
+// Paleta de colores para proyectos (extraída del manual de marca)
+const PROJECT_COLORS = [
+  '#003237', '#FA4616', '#00A172', '#0072C1', '#6F2595',
+  '#CA7B4B', '#00AB9C', '#E70059', '#007E69', '#FF8C00',
+  '#2F2E97', '#AC005F', '#926030', '#00ACE7', '#34d399',
+];
+
+const SEMANA_MES = [
+  { desde: 35, hasta: 39, label: 'Sep 2025' },
+  { desde: 40, hasta: 44, label: 'Oct 2025' },
+  { desde: 45, hasta: 48, label: 'Nov 2025' },
+  { desde: 49, hasta: 52, label: 'Dic 2025' },
+  { desde:  1, hasta:  5, label: 'Ene 2026' },
+  { desde:  6, hasta:  9, label: 'Feb 2026' },
+  { desde: 10, hasta: 13, label: 'Mar 2026' },
+  { desde: 14, hasta: 17, label: 'Abr 2026' },
+  { desde: 19, hasta: 22, label: 'May 2026' },
+  { desde: 23, hasta: 27, label: 'Jun 2026' },
+];
+
+function semanaLabel(n) {
+  const num = Number(n);
+  const mes = SEMANA_MES.find(r => num >= r.desde && num <= r.hasta);
+  return mes ? `Sem ${n} · ${mes.label}` : `Sem ${n}`;
+}
+
+// ── State ────────────────────────────────────────────────────────────────
+let allData = [];
+let projectColorMap = {};
+
+// ── Fetch & parse ────────────────────────────────────────────────────────
+async function fetchData() {
+  const res = await fetch(CSV_URL);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return parseCSV(await res.text());
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = splitCSVLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = splitCSVLine(line);
+    if (vals.every(v => v === '')) return null;
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = vals[i] !== undefined ? vals[i] : '';
+      if (v.startsWith('#')) { obj[h] = null; return; }
+      const n = parseFloat(v);
+      obj[h] = v === '' ? null : (isNaN(n) ? v : n);
+    });
+    if (obj.colaborador && NOMBRE_MAP[obj.colaborador]) {
+      obj.colaborador = NOMBRE_MAP[obj.colaborador];
+    }
+    return obj;
+  }).filter(Boolean);
+}
+
+function splitCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+// ── Semana default = semana actual ───────────────────────────────────────
+function getSemanaDefault(data) {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const currentWeek = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+  const allNums = [...new Set(data.map(r => Number(r.semana)).filter(n => !isNaN(n) && n > 0))];
+  // Preferir semana actual; si no hay datos, buscar la más reciente disponible
+  if (allNums.includes(currentWeek)) return String(currentWeek);
+  const candidates = allNums.filter(s => s <= currentWeek);
+  return candidates.length ? String(Math.max(...candidates)) : '';
+}
+
+// ── Populate filters ──────────────────────────────────────────────────────
+function populateFilters(data) {
+  const uniqueNum = key => [...new Set(data.map(r => r[key]).filter(v => v !== null && v !== ''))]
+    .sort((a, b) => Number(a) - Number(b));
+  const unique = key => [...new Set(data.map(r => r[key]).filter(Boolean))].sort();
+
+  fillSelect('filterSemana',   uniqueNum('semana'),      'Todas',  semanaLabel);
+  fillSelect('filterConsultor', unique('colaborador'),   'Todos');
+
+  document.getElementById('filterSemana').value = getSemanaDefault(data);
+
+  ['filterSemana', 'filterConsultor'].forEach(id =>
+    document.getElementById(id).addEventListener('change', renderCards)
+  );
+}
+
+function fillSelect(id, options, allLabel, labelFn) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = `<option value="">— ${allLabel} —</option>`;
+  options.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = labelFn ? labelFn(v) : v;
+    sel.appendChild(o);
+  });
+}
+
+function resetFilters() {
+  document.getElementById('filterSemana').value   = getSemanaDefault(allData);
+  document.getElementById('filterConsultor').value = '';
+  renderCards();
+}
+
+// ── Assign stable colors to projects ─────────────────────────────────────
+function buildProjectColorMap(data) {
+  const projects = [...new Set(data.map(r => r.proyecto).filter(Boolean))].sort();
+  projects.forEach((p, i) => {
+    projectColorMap[p] = PROJECT_COLORS[i % PROJECT_COLORS.length];
+  });
+}
+
+// ── Format ───────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 }).format(n);
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────
+function renderCards() {
+  const s = document.getElementById('filterSemana').value;
+  const c = document.getElementById('filterConsultor').value;
+
+  const filtered = allData.filter(r =>
+    (!s || String(r.semana) === s) &&
+    (!c || r.colaborador === c)
+  );
+
+  const container = document.getElementById('cardsContainer');
+  const summaryBar = document.getElementById('summaryBar');
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="state-msg">Sin datos para los filtros seleccionados.</div>';
+    summaryBar.style.display = 'none';
+    return;
+  }
+
+  // Aggregate: consultor → proyecto → horas
+  const consultorMap = {};
+  filtered.forEach(r => {
+    const col = r.colaborador || 'Sin nombre';
+    const proy = r.proyecto || 'Sin proyecto';
+    const hrs = Number(r.horasPresupuestadas) || 0;
+    if (!consultorMap[col]) consultorMap[col] = {};
+    if (!consultorMap[col][proy]) consultorMap[col][proy] = 0;
+    consultorMap[col][proy] += hrs;
+  });
+
+  // Sort consultors by total hours desc
+  const consultors = Object.entries(consultorMap)
+    .map(([name, proyectos]) => {
+      const total = Object.values(proyectos).reduce((a, b) => a + b, 0);
+      const rows = Object.entries(proyectos)
+        .map(([p, h]) => ({ proyecto: p, horas: h }))
+        .sort((a, b) => b.horas - a.horas);
+      return { name, total, rows };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Summary
+  const totalConsultores = consultors.length;
+  const totalProyectos = new Set(filtered.map(r => r.proyecto).filter(Boolean)).size;
+  const totalHoras = consultors.reduce((a, c) => a + c.total, 0);
+
+  document.getElementById('sumConsultores').textContent = totalConsultores;
+  document.getElementById('sumProyectos').textContent   = totalProyectos;
+  document.getElementById('sumHoras').textContent       = fmt(totalHoras) + ' hrs';
+  summaryBar.style.display = 'flex';
+
+  // Build cards
+  const cards = consultors.map(({ name, total, rows }) => {
+    const projectRows = rows.map(({ proyecto, horas }) => {
+      const pct = total > 0 ? (horas / total * 100) : 0;
+      const color = projectColorMap[proyecto] || '#003237';
+      const colorHex = color.replace('#', '%23');
+      return `
+        <div class="project-row">
+          <div class="project-row-top">
+            <span class="project-name" title="${proyecto}">${proyecto}</span>
+            <span class="project-hrs">${fmt(horas)} hrs<span class="project-pct">${pct.toFixed(0)}%</span></span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct.toFixed(1)}%; background:${color}"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="consultant-card">
+        <div class="card-header">
+          <div class="card-name">${name}</div>
+          <div class="card-total">
+            <div class="total-hrs">${fmt(total)}</div>
+            <div class="total-label">hrs totales</div>
+          </div>
+        </div>
+        <div class="project-rows">${projectRows}</div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `<div class="cards-grid">${cards}</div>`;
+}
+
+// ── Timestamp ────────────────────────────────────────────────────────────
+function updateTimestamp(data) {
+  let d = null;
+  const dates = data.map(r => r.ultimaActualizacion).filter(Boolean);
+  if (dates.length) {
+    const latest = dates.reduce((a, b) => (a > b ? a : b));
+    const parsed = latest instanceof Date ? latest : new Date(latest);
+    if (!isNaN(parsed) && parsed.getFullYear() >= 2020) d = parsed;
+  }
+  if (!d) d = new Date();
+  const formatted = d.toLocaleString('es-CL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  document.getElementById('updateNotice').textContent = `Datos actualizados al ${formatted}`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    allData = await fetchData();
+    buildProjectColorMap(allData);
+    populateFilters(allData);
+    updateTimestamp(allData);
+    renderCards();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('cardsContainer').innerHTML =
+      `<div class="state-msg">⚠️ No se pudo cargar la información.<br>
+       <small>${err.message}</small></div>`;
+    document.getElementById('updateNotice').textContent = '⚠️ Error al cargar datos';
+  }
+}
+
+init();
+
+// Auto-refresh cada 10 minutos
+setInterval(async () => {
+  try {
+    allData = await fetchData();
+    updateTimestamp(allData);
+    renderCards();
+  } catch (_) {}
+}, 10 * 60 * 1000);
+</script>
+</body>
+</html>
