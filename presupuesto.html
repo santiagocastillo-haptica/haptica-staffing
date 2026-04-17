@@ -494,9 +494,11 @@ function handleTokenResponse(resp) {
   fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${resp.access_token}`)
     .then(r => r.json())
     .then(info => {
-      const email = info.email;
-      if (!AUTHORIZED.includes(email)) {
-        document.getElementById('accessDenied').style.display = 'block';
+      const email = (info.email || '').toLowerCase();
+      if (!AUTHORIZED.map(e => e.toLowerCase()).includes(email)) {
+        const denied = document.getElementById('accessDenied');
+        denied.style.display = 'block';
+        denied.textContent   = `⛔ Sin acceso: ${info.email || 'cuenta desconocida'}`;
         google.accounts.oauth2.revoke(resp.access_token);
         return;
       }
