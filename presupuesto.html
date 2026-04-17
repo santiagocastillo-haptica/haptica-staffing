@@ -405,7 +405,7 @@
 const CLIENT_ID       = '662265278503-9lnnh14m6gle9aus0tuvhv3n556tu99j.apps.googleusercontent.com';
 const SPREADSHEET_ID  = '1fPL_GZfRAH_Jz8hHfvZtPEpxf1dAlJ-8W8JOBgsTw18';
 const SHEET_NAME      = 'Dashboard_Data';
-const SCOPES          = 'https://www.googleapis.com/auth/spreadsheets';
+const SCOPES          = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email';
 const AUTHORIZED      = ['santiago.castillo@haptica.co', 'mariacamila@haptica.co'];
 
 const NOMBRE_MAP = {
@@ -491,7 +491,9 @@ function gisLoaded() {
 function handleTokenResponse(resp) {
   if (resp.error) { console.error(resp); return; }
   // Get user email via tokeninfo
-  fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${resp.access_token}`)
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${resp.access_token}` }
+  })
     .then(r => r.json())
     .then(info => {
       const email = (info.email || '').toLowerCase();
