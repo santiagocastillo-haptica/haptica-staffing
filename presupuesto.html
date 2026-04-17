@@ -406,10 +406,16 @@ async function loadData() {
   document.getElementById('matrixContainer').innerHTML =
     '<div class="state-msg"><div class="spinner"></div>Cargando datos…</div>';
   try {
-    const [dataRes, cfgRes] = await Promise.all([
-      gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: SHEET_DATA }),
-      gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: SHEET_CONFIG }).catch(() => ({ result: { values: [] } })),
-    ]);
+    let cfgRes = { result: { values: [] } };
+    try {
+      cfgRes = await Promise.resolve(gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID, range: SHEET_CONFIG
+      }));
+    } catch(e) { /* Config tab optional */ }
+
+    const dataRes = await Promise.resolve(gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID, range: SHEET_DATA
+    }));
 
     // Parse config
     const cfgRows = cfgRes.result.values || [];
