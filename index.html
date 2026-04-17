@@ -343,38 +343,6 @@
     tr.row-alerta:hover { background: #fee2e2; }
     tr.row-alerta td:first-child { border-left: 3px solid #dc2626; }
 
-    /* ── Proyecto más desviado ──────────────────── */
-    .dev-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px 28px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      margin-bottom: 24px;
-      border-left: 4px solid #FA4616;
-    }
-    .dev-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-    }
-    .dev-project-name {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1a2e35;
-      margin-bottom: 12px;
-    }
-    .dev-pct {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-    .dev-period {
-      font-size: 11px;
-      color: #9ca3af;
-      margin-bottom: 12px;
-    }
-
     /* ── Chart toggle ───────────────────────────── */
     .toggle-group {
       display: flex;
@@ -494,30 +462,6 @@
         <div class="load-bar-fill" id="loadBarEjec" style="width:0%"></div>
       </div>
       <div class="load-row-value" id="loadValEjec">—</div>
-    </div>
-  </div>
-
-  <!-- Proyecto más desviado -->
-  <div class="dev-card">
-    <div class="dev-card-header">
-      <div class="load-label" id="devLabel">Proyecto más desviado · Últimas 5 semanas</div>
-      <div class="dev-pct" id="devPct">—</div>
-    </div>
-    <div class="dev-period" id="devPeriod"></div>
-    <div class="dev-project-name" id="devProject">—</div>
-    <div class="load-row">
-      <div class="load-row-label">Presupuestadas</div>
-      <div class="load-bar-wrap">
-        <div class="load-bar-fill" id="devBarPres" style="width:0%; background:#003237"></div>
-      </div>
-      <div class="load-row-value" id="devValPres">—</div>
-    </div>
-    <div class="load-row">
-      <div class="load-row-label">Ejecutadas</div>
-      <div class="load-bar-wrap">
-        <div class="load-bar-fill" id="devBarEjec" style="width:0%"></div>
-      </div>
-      <div class="load-row-value" id="devValEjec">—</div>
     </div>
   </div>
 
@@ -1067,60 +1011,6 @@ function renderTrend(filteredNoSemana) {
   });
 }
 
-// ── Proyecto más desviado (últimas 5 semanas) ─────────────────────────────
-function updateMostDeviated() {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const currentWeek = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-
-  const allNums = [...new Set(allData.map(r => Number(r.semana)).filter(n => !isNaN(n) && n > 0))].sort((a, b) => a - b);
-  const candidates = allNums.filter(s => s <= currentWeek - 1);
-  const last5 = candidates.slice(-5);
-
-  if (!last5.length) return;
-
-  const recentData = allData.filter(r => last5.includes(Number(r.semana)));
-
-  // Aggregate by project
-  const projectMap = {};
-  recentData.forEach(r => {
-    const k = r.proyecto || 'Sin definir';
-    if (!projectMap[k]) projectMap[k] = { pres: 0, ejec: 0 };
-    projectMap[k].pres += Number(r.horasPresupuestadas) || 0;
-    projectMap[k].ejec += Number(r.horasEjecutadas)     || 0;
-  });
-
-  // Find most deviated (highest ejec/pres ratio, pres > 0)
-  let best = null;
-  let maxRatio = -Infinity;
-  Object.entries(projectMap).forEach(([name, vals]) => {
-    if (vals.pres > 0) {
-      const ratio = vals.ejec / vals.pres;
-      if (ratio > maxRatio) { maxRatio = ratio; best = { name, ...vals, ratio }; }
-    }
-  });
-
-  if (!best) return;
-
-  const devColor = best.ratio > 1.2 ? '#f87171'
-                 : best.ratio > 1.0 ? '#FA4616'
-                 : '#34d399';
-  const maxVal = Math.max(best.pres, best.ejec) || 1;
-  const weeksLabel = last5.length > 1 ? `Sems. ${last5[0]}–${last5[last5.length - 1]}` : `Sem. ${last5[0]}`;
-  const desv = best.ejec - best.pres;
-
-  document.getElementById('devLabel').textContent   = `Proyecto más desviado · ${weeksLabel}`;
-  document.getElementById('devPeriod').textContent  = `${weeksLabel} · Desviación acumulada: ${(desv >= 0 ? '+' : '') + fmt(desv)} hrs`;
-  document.getElementById('devProject').textContent = best.name;
-  document.getElementById('devPct').textContent     = (best.ratio * 100).toFixed(1) + '%';
-  document.getElementById('devPct').style.color     = devColor;
-  document.getElementById('devBarPres').style.width      = (best.pres / maxVal * 100) + '%';
-  document.getElementById('devBarEjec').style.width      = (best.ejec / maxVal * 100) + '%';
-  document.getElementById('devBarEjec').style.background = devColor;
-  document.getElementById('devValPres').textContent = fmt(best.pres);
-  document.getElementById('devValEjec').textContent = fmt(best.ejec);
-}
-
 // ── Main update cycle ────────────────────────────────────────────────────
 function updateDashboard() {
   const data = getFiltered();
@@ -1129,7 +1019,6 @@ function updateDashboard() {
   renderTable(data);
 
   updateLoadBar();
-  updateMostDeviated();
 
   // Tendencia: aplica colaborador/proyecto/estado pero NO semana
   const c = document.getElementById('filterColaborador').value;
