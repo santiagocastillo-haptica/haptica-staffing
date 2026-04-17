@@ -473,9 +473,7 @@ function showToast(msg, type = '') {
 // ── Google OAuth (GIS + GAPI) ─────────────────────────────────────────────
 function gapiLoaded() {
   gapi.load('client', async () => {
-    await gapi.client.init({
-      discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    });
+    await gapi.client.load('https://sheets.googleapis.com/$discovery/rest?version=v4');
     gapiReady = true;
   });
 }
@@ -505,6 +503,7 @@ function handleTokenResponse(resp) {
         return;
       }
       currentUser = email;
+      gapi.client.setToken({ access_token: resp.access_token });
       onAuthorized();
     });
 }
