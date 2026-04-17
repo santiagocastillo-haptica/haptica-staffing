@@ -300,8 +300,8 @@
       <select id="filterSemana"><option value="">Todas</option></select>
     </div>
     <div class="filter-group">
-      <label>Consultor</label>
-      <select id="filterConsultor"><option value="">Todos</option></select>
+      <label>Haptiqueño</label>
+      <select id="filterHaptiqueño"><option value="">Todos</option></select>
     </div>
     <button class="btn-reset" onclick="resetFilters()">↺ Limpiar</button>
   </div>
@@ -312,8 +312,8 @@
   <!-- Summary chips -->
   <div class="summary-bar" id="summaryBar" style="display:none">
     <div class="summary-chip">
-      <div class="chip-label">Consultores</div>
-      <div class="chip-value" id="sumConsultores">—</div>
+      <div class="chip-label">Haptiqueños</div>
+      <div class="chip-value" id="sumHaptiqueñoes">—</div>
     </div>
     <div class="summary-chip">
       <div class="chip-label">Proyectos activos</div>
@@ -344,6 +344,21 @@ const NOMBRE_MAP = {
   'Natalia Rodriguez': 'Natalia Rodríguez',
 };
 
+// Orden fijo para proyectos internos/transversales
+const PROJECT_FIXED_ORDER = ['ADM-01', 'ADM-02', 'COM', 'OPS'];
+
+function sortProjectRows(rows) {
+  const fixed = [];
+  const rest  = [];
+  rows.forEach(r => {
+    const idx = PROJECT_FIXED_ORDER.indexOf(r.proyecto);
+    if (idx !== -1) fixed[idx] = r;
+    else rest.push(r);
+  });
+  rest.sort((a, b) => b.horas - a.horas);
+  return [...fixed.filter(Boolean), ...rest];
+}
+
 // Paleta de colores para proyectos (extraída del manual de marca)
 const PROJECT_COLORS = [
   '#003237', '#FA4616', '#00A172', '#0072C1', '#6F2595',
@@ -360,7 +375,7 @@ const SEMANA_MES = [
   { desde:  6, hasta:  9, label: 'Feb 2026' },
   { desde: 10, hasta: 13, label: 'Mar 2026' },
   { desde: 14, hasta: 17, label: 'Abr 2026' },
-  { desde: 19, hasta: 22, label: 'May 2026' },
+  { desde: 18, hasta: 22, label: 'May 2026' },
   { desde: 23, hasta: 27, label: 'Jun 2026' },
 ];
 
@@ -434,11 +449,11 @@ function populateFilters(data) {
   const unique = key => [...new Set(data.map(r => r[key]).filter(Boolean))].sort();
 
   fillSelect('filterSemana',   uniqueNum('semana'),      'Todas',  semanaLabel);
-  fillSelect('filterConsultor', unique('colaborador'),   'Todos');
+  fillSelect('filterHaptiqueño', unique('colaborador'),   'Todos');
 
   document.getElementById('filterSemana').value = getSemanaDefault(data);
 
-  ['filterSemana', 'filterConsultor'].forEach(id =>
+  ['filterSemana', 'filterHaptiqueño'].forEach(id =>
     document.getElementById(id).addEventListener('change', renderCards)
   );
 }
@@ -456,7 +471,7 @@ function fillSelect(id, options, allLabel, labelFn) {
 
 function resetFilters() {
   document.getElementById('filterSemana').value   = getSemanaDefault(allData);
-  document.getElementById('filterConsultor').value = '';
+  document.getElementById('filterHaptiqueño').value = '';
   renderCards();
 }
 
@@ -477,7 +492,7 @@ function fmt(n) {
 // ── Render cards ──────────────────────────────────────────────────────────
 function renderCards() {
   const s = document.getElementById('filterSemana').value;
-  const c = document.getElementById('filterConsultor').value;
+  const c = document.getElementById('filterHaptiqueño').value;
 
   const filtered = allData.filter(r =>
     (!s || String(r.semana) === s) &&
@@ -508,19 +523,19 @@ function renderCards() {
   const consultors = Object.entries(consultorMap)
     .map(([name, proyectos]) => {
       const total = Object.values(proyectos).reduce((a, b) => a + b, 0);
-      const rows = Object.entries(proyectos)
-        .map(([p, h]) => ({ proyecto: p, horas: h }))
-        .sort((a, b) => b.horas - a.horas);
+      const rows = sortProjectRows(
+        Object.entries(proyectos).map(([p, h]) => ({ proyecto: p, horas: h }))
+      );
       return { name, total, rows };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
   // Summary
-  const totalConsultores = consultors.length;
+  const totalHaptiqueñoes = consultors.length;
   const totalProyectos = new Set(filtered.map(r => r.proyecto).filter(Boolean)).size;
   const totalHoras = consultors.reduce((a, c) => a + c.total, 0);
 
-  document.getElementById('sumConsultores').textContent = totalConsultores;
+  document.getElementById('sumHaptiqueñoes').textContent = totalHaptiqueñoes;
   document.getElementById('sumProyectos').textContent   = totalProyectos;
   document.getElementById('sumHoras').textContent       = fmt(totalHoras) + ' hrs';
   summaryBar.style.display = 'flex';
